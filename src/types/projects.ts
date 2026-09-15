@@ -9,6 +9,13 @@ export interface Project {
   description: string;
   club?: ClubSummary;
   participants: ParticipantInfo[];
+  startYear: number;
+  endYear?: number;
+  status: ProjectStatus;
+  /** Max 20 items, each up to 300 characters. */
+  repositories: string[];
+  /** Max 20 items, each up to 50 characters. */
+  techStacks: string[];
 }
 
 export interface GetProjectsRequest {
