@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { GetProjectsRequest, Project } from '../types/projects';
 import { abolishedClub, activeProject, graduateStudent } from './fixtures';
 import { createClient, lastRequest, mockFetch, okEnvelope } from './helpers';
 
@@ -56,4 +57,40 @@ describe('ProjectsApi.getProjects', () => {
     expect(res.data.projects[0]?.club).toBeNull();
     expect(res.data.projects[0]?.endYear).toBeNull();
   });
+
+  it('category 필터를 단일 값으로 보낸다', async () => {
+    const fetchMock = mockFetch({
+      body: okEnvelope({ totalPages: 0, totalElements: 0, projects: [] }),
+    });
+
+    await createClient().projects().getProjects({ category: 'IDEA_FESTIVAL' });
+
+    expect(Object.fromEntries(lastRequest(fetchMock).url.searchParams)).toEqual({
+      category: 'IDEA_FESTIVAL',
+    });
+  });
+
+  it('categories, iconUrl, iconKey, deploymentUrl을 반환하고 알 수 없는 카테고리도 허용한다', async () => {
+    const project: Project = {
+      ...activeProject,
+      categories: ['TEAM', 'CLUB', 'FUTURE_CATEGORY'],
+      iconUrl: 'https://cdn.datagsm.kr/project-icons/uuid.png',
+      iconKey: 'project-icons/uuid.png',
+      deploymentUrl: 'https://datagsm.kr',
+    };
+    mockFetch({ body: okEnvelope({ totalPages: 1, totalElements: 1, projects: [project] }) });
+
+    const res = await createClient().projects().getProjects();
+
+    expect(res.data.projects[0]).toEqual(project);
+  });
 });
+
+// 타입 수준 검증: tsc --noEmit(type-check)에서 확인된다.
+export const projectFilterTypeChecks: GetProjectsRequest[] = [
+  { category: 'TOY_PROJECT' },
+  // @ts-expect-error 요청 필터에는 알려진 카테고리만 쓸 수 있다
+  { category: 'UNKNOWN' },
+  // @ts-expect-error 필터는 단일 값이다
+  { category: ['TEAM'] },
+];

@@ -42,6 +42,8 @@ export type {
 
 export type {
   Project,
+  ProjectCategory,
+  KnownProjectCategory,
   ProjectSortBy,
   ProjectStatus,
   GetProjectsRequest,
