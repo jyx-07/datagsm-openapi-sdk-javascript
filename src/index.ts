@@ -49,6 +49,8 @@ export type {
 } from './types/projects';
 
 export type {
+  NeisDateFilter,
+  RequiredNeisDateFilter,
   Timetable,
   GetTimetablesRequest,
   GetTimetablesResponse,
