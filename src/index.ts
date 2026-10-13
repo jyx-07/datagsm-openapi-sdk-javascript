@@ -28,9 +28,13 @@ export type {
 export type {
   Student,
   Role,
+  EnrolledRole,
   SortBy as StudentSortBy,
   GetStudentsRequest,
   GetStudentsResponse,
+  CreateStudentRequest,
+  UpdateStudentRequest,
+  StudentResponse,
 } from './types/students';
 
 export type {
@@ -39,6 +43,8 @@ export type {
   ClubStatus,
   GetClubsRequest,
   GetClubsResponse,
+  ClubRequest,
+  ClubResponse,
 } from './types/clubs';
 
 export type {
@@ -49,6 +55,10 @@ export type {
   ProjectStatus,
   GetProjectsRequest,
   GetProjectsResponse,
+  CreateProjectRequest,
+  UpdateProjectRequest,
+  EndProjectRequest,
+  ProjectResponse,
 } from './types/projects';
 
 export type {
