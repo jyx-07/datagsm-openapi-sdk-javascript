@@ -13,9 +13,7 @@ export {
 } from './errors';
 
 export type {
-  PageInfo,
   PageRequest,
-  PagedResponse,
   SortDirection,
   Sex,
   Major,
