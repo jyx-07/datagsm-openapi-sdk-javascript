@@ -29,11 +29,11 @@ export interface Timetable {
   officeName: string;
   timetableDate: string;
   academicYear: string;
-  semester?: string;
+  semester: string | null;
   grade: number;
   classNum: number;
   period: number;
-  subject?: string;
+  subject: string | null;
 }
 
 export type GetTimetablesRequest = {
@@ -58,11 +58,11 @@ export interface Meal {
   mealDate: string;
   mealType: MealType;
   mealMenu: string[];
-  mealAllergyInfo: string[];
-  mealCalories: string;
-  originInfo: string;
-  nutritionInfo: string;
-  mealServeCount: number;
+  mealAllergyInfo: string[] | null;
+  mealCalories: string | null;
+  originInfo: string | null;
+  nutritionInfo: string | null;
+  mealServeCount: number | null;
 }
 
 export type GetMealsRequest = NeisDateFilter;
@@ -80,10 +80,10 @@ export interface Schedule {
   scheduleDate: string;
   academicYear: string;
   eventName: string;
-  eventContent: string;
-  dayCategory: string;
-  schoolCourseType: string;
-  dayNightType: string;
+  eventContent: string | null;
+  dayCategory: string | null;
+  schoolCourseType: string | null;
+  dayNightType: string | null;
   targetGrades: number[];
 }
 

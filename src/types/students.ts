@@ -24,19 +24,19 @@ export interface Student {
   name: string;
   sex: Sex;
   email: string;
-  grade?: number;
-  classNum?: number;
-  number?: number;
-  studentNumber?: number;
-  major?: Major;
-  specialty?: string;
+  grade: number | null;
+  classNum: number | null;
+  number: number | null;
+  studentNumber: number | null;
+  major: Major | null;
+  specialty: string | null;
   role: Role;
-  dormitoryFloor?: number;
-  dormitoryRoom?: number;
-  majorClub?: ClubSummary;
-  autonomousClub?: ClubSummary;
-  githubId?: string;
-  githubUrl?: string;
+  dormitoryFloor: number | null;
+  dormitoryRoom: number | null;
+  majorClub: ClubSummary | null;
+  autonomousClub: ClubSummary | null;
+  githubId: string | null;
+  githubUrl: string | null;
 }
 
 export interface GetStudentsRequest {

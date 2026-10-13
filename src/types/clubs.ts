@@ -7,11 +7,11 @@ export interface Club {
   id: number;
   name: string;
   type: ClubType;
-  leader?: ParticipantInfo;
+  leader: ParticipantInfo | null;
   participants: ParticipantInfo[];
   foundedYear: number;
   status: ClubStatus;
-  abolishedYear?: number;
+  abolishedYear: number | null;
 }
 
 export interface GetClubsRequest {

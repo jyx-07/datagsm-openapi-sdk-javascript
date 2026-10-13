@@ -7,10 +7,10 @@ export interface Project {
   id: number;
   name: string;
   description: string;
-  club?: ClubSummary;
+  club: ClubSummary | null;
   participants: ParticipantInfo[];
   startYear: number;
-  endYear?: number;
+  endYear: number | null;
   status: ProjectStatus;
   /** Max 20 items, each up to 300 characters. */
   repositories: string[];

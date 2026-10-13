@@ -13,8 +13,8 @@ export interface ParticipantInfo {
   id: number;
   name: string;
   email: string;
-  studentNumber: number;
-  major: Major;
+  studentNumber: number | null;
+  major: Major | null;
   sex: Sex;
 }
 
