@@ -6,6 +6,7 @@ export {
   UnauthorizedError,
   ForbiddenError,
   NotFoundError,
+  ConflictError,
   RateLimitError,
   ServerError,
   NetworkError,

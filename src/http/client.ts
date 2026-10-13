@@ -1,5 +1,6 @@
 import {
   BadRequestError,
+  ConflictError,
   DataGsmError,
   ForbiddenError,
   NetworkError,
@@ -16,10 +17,14 @@ export interface HttpClientConfig {
   headers?: Record<string, string>;
 }
 
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+
+export type QueryParams = Record<string, string | number | boolean | undefined>;
+
 export interface RequestOptions {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
+  method: HttpMethod;
   path: string;
-  query?: Record<string, string | number | boolean | undefined>;
+  query?: QueryParams;
   body?: unknown;
   headers?: Record<string, string>;
 }
@@ -29,6 +34,30 @@ export class HttpClient {
 
   constructor(config: HttpClientConfig) {
     this.config = config;
+  }
+
+  get<T>(path: string, query?: QueryParams): Promise<T> {
+    return this.request<T>({ method: 'GET', path, query });
+  }
+
+  post<T>(path: string, body?: unknown): Promise<T> {
+    return this.request<T>({ method: 'POST', path, body });
+  }
+
+  put<T>(path: string, body: unknown): Promise<T> {
+    return this.request<T>({ method: 'PUT', path, body });
+  }
+
+  delete<T>(path: string): Promise<T> {
+    return this.request<T>({ method: 'DELETE', path });
+  }
+
+  /**
+   * 응답 본문이 없는 요청(204 No Content 또는 빈 200)을 보냅니다.
+   * 서버가 본문을 보내더라도 무시하고, 에러 응답은 그대로 예외로 던집니다.
+   */
+  async requestVoid(options: RequestOptions): Promise<void> {
+    await this.request<unknown>(options);
   }
 
   async request<T>(options: RequestOptions): Promise<T> {
@@ -45,7 +74,7 @@ export class HttpClient {
       const response = await fetch(url, {
         method: options.method,
         headers,
-        body: options.body ? JSON.stringify(options.body) : undefined,
+        body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
         signal: controller.signal,
       });
 
@@ -74,10 +103,7 @@ export class HttpClient {
     }
   }
 
-  private buildUrl(
-    path: string,
-    query?: Record<string, string | number | boolean | undefined>,
-  ): string {
+  private buildUrl(path: string, query?: QueryParams): string {
     const url = new URL(path, this.config.baseUrl);
 
     if (query) {
@@ -101,16 +127,21 @@ export class HttpClient {
   }
 
   private async handleResponse<T>(response: Response): Promise<T> {
+    // 204 No Content 또는 빈 본문은 undefined로 처리한다.
+    const text = await response.text();
     let responseData: unknown;
+    let isInvalidJson = false;
 
     try {
-      const text = await response.text();
       responseData = text ? JSON.parse(text) : undefined;
     } catch {
-      responseData = undefined;
+      isInvalidJson = true;
     }
 
     if (response.ok) {
+      if (isInvalidJson) {
+        throw new DataGsmError('Invalid JSON response', response.status, text);
+      }
       return responseData as T;
     }
 
@@ -125,6 +156,8 @@ export class HttpClient {
         throw new ForbiddenError(errorMessage, responseData);
       case 404:
         throw new NotFoundError(errorMessage, responseData);
+      case 409:
+        throw new ConflictError(errorMessage, responseData);
       case 429: {
         const retryAfter = response.headers.get('Retry-After');
         const retryAfterSeconds = retryAfter ? parseInt(retryAfter, 10) : undefined;

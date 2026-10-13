@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { HttpClient } from '../http/client';
 import {
   BadRequestError,
+  ConflictError,
   DataGsmError,
   ForbiddenError,
   NetworkError,
@@ -90,5 +91,85 @@ describe('HttpClient', () => {
     await expect(createHttpClient().request({ method: 'GET', path: '/x' })).rejects.toBeInstanceOf(
       NetworkError,
     );
+  });
+});
+
+describe('HttpClient 쓰기 요청', () => {
+  it('POST 본문을 JSON으로 직렬화한다', async () => {
+    const fetchMock = mockFetch({ body: { status: 'OK', code: 200, message: 'OK', data: {} } });
+
+    await createHttpClient().post('/v1/clubs', { name: '동아리', participantIds: [] });
+
+    const req = lastRequest(fetchMock);
+    expect(req.method).toBe('POST');
+    expect(req.headers['Content-Type']).toBe('application/json');
+    expect(req.body).toEqual({ name: '동아리', participantIds: [] });
+  });
+
+  it('falsy 본문도 생략하지 않고 직렬화한다', async () => {
+    const fetchMock = mockFetch({ status: 204 });
+
+    await createHttpClient().put('/x', 0);
+
+    expect(fetchMock.mock.lastCall?.[1]?.body).toBe('0');
+  });
+
+  it('본문이 없으면 body를 보내지 않는다', async () => {
+    const fetchMock = mockFetch({ status: 204 });
+
+    await createHttpClient().delete('/v1/clubs/1');
+
+    const req = lastRequest(fetchMock);
+    expect(req.method).toBe('DELETE');
+    expect(req.body).toBeUndefined();
+  });
+
+  it('204 No Content 응답을 undefined로 처리한다', async () => {
+    mockFetch({ status: 204 });
+
+    await expect(createHttpClient().requestVoid({ method: 'DELETE', path: '/x' })).resolves.toBe(
+      undefined,
+    );
+  });
+
+  it('본문이 빈 200 응답을 undefined로 처리한다', async () => {
+    mockFetch({ status: 200 });
+
+    await expect(createHttpClient().post('/x')).resolves.toBeUndefined();
+  });
+
+  it('requestVoid는 envelope 본문이 와도 무시한다', async () => {
+    mockFetch({ body: { status: 'OK', code: 200, message: 'OK' } });
+
+    await expect(createHttpClient().requestVoid({ method: 'POST', path: '/x' })).resolves.toBe(
+      undefined,
+    );
+  });
+
+  it('성공 응답의 본문이 JSON이 아니면 DataGsmError를 던진다', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(() => Promise.resolve(new Response('<html>', { status: 200 }))),
+    );
+
+    await expect(createHttpClient().get('/x')).rejects.toMatchObject({
+      name: 'DataGsmError',
+      statusCode: 200,
+    });
+  });
+
+  it('409 응답을 ConflictError로 변환한다', async () => {
+    mockFetch({
+      status: 409,
+      body: { status: 'CONFLICT', code: 409, message: '이미 존재하는 동아리 이름입니다.' },
+    });
+
+    const promise = createHttpClient().post('/v1/clubs', {});
+
+    await expect(promise).rejects.toBeInstanceOf(ConflictError);
+    await expect(promise).rejects.toMatchObject({
+      statusCode: 409,
+      message: '이미 존재하는 동아리 이름입니다.',
+    });
   });
 });

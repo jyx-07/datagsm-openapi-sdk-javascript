@@ -43,6 +43,14 @@ export class NotFoundError extends DataGsmError {
   }
 }
 
+export class ConflictError extends DataGsmError {
+  constructor(message: string, response?: unknown) {
+    super(message, 409, response);
+    this.name = 'ConflictError';
+    Object.setPrototypeOf(this, ConflictError.prototype);
+  }
+}
+
 export class RateLimitError extends DataGsmError {
   public readonly retryAfter?: number;
 
