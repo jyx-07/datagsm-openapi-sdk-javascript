@@ -11,7 +11,7 @@ import {
 export class NeisApi {
   constructor(private readonly httpClient: HttpClient) {}
 
-  async getTimetables(request: GetTimetablesRequest = {}): Promise<GetTimetablesResponse> {
+  async getTimetables(request: GetTimetablesRequest): Promise<GetTimetablesResponse> {
     return this.httpClient.request<GetTimetablesResponse>({
       method: 'GET',
       path: '/v1/neis/timetables',
@@ -21,10 +21,6 @@ export class NeisApi {
         date: request.date,
         fromDate: request.fromDate,
         toDate: request.toDate,
-        isValidDateCombination: request.isValidDateCombination,
-        isValidDateRange: request.isValidDateRange,
-        isValidDateRangePeriod: request.isValidDateRangePeriod,
-        isDateRequired: request.isDateRequired,
       },
     });
   }
@@ -37,9 +33,6 @@ export class NeisApi {
         date: request.date,
         fromDate: request.fromDate,
         toDate: request.toDate,
-        isValidDateCombination: request.isValidDateCombination,
-        isValidDateRange: request.isValidDateRange,
-        isValidDateRangePeriod: request.isValidDateRangePeriod,
       },
     });
   }
@@ -52,9 +45,6 @@ export class NeisApi {
         date: request.date,
         fromDate: request.fromDate,
         toDate: request.toDate,
-        isValidDateCombination: request.isValidDateCombination,
-        isValidDateRange: request.isValidDateRange,
-        isValidDateRangePeriod: request.isValidDateRangePeriod,
       },
     });
   }

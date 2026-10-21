@@ -6,15 +6,14 @@ export {
   UnauthorizedError,
   ForbiddenError,
   NotFoundError,
+  ConflictError,
   RateLimitError,
   ServerError,
   NetworkError,
 } from './errors';
 
 export type {
-  PageInfo,
   PageRequest,
-  PagedResponse,
   SortDirection,
   Sex,
   Major,
@@ -27,9 +26,13 @@ export type {
 export type {
   Student,
   Role,
+  EnrolledRole,
   SortBy as StudentSortBy,
   GetStudentsRequest,
   GetStudentsResponse,
+  CreateStudentRequest,
+  UpdateStudentRequest,
+  StudentResponse,
 } from './types/students';
 
 export type {
@@ -38,17 +41,27 @@ export type {
   ClubStatus,
   GetClubsRequest,
   GetClubsResponse,
+  ClubRequest,
+  ClubResponse,
 } from './types/clubs';
 
 export type {
   Project,
+  ProjectCategory,
+  KnownProjectCategory,
   ProjectSortBy,
   ProjectStatus,
   GetProjectsRequest,
   GetProjectsResponse,
+  CreateProjectRequest,
+  UpdateProjectRequest,
+  EndProjectRequest,
+  ProjectResponse,
 } from './types/projects';
 
 export type {
+  NeisDateFilter,
+  RequiredNeisDateFilter,
   Timetable,
   GetTimetablesRequest,
   GetTimetablesResponse,

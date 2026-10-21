@@ -13,8 +13,8 @@ export interface ParticipantInfo {
   id: number;
   name: string;
   email: string;
-  studentNumber: number;
-  major: Major;
+  studentNumber: number | null;
+  major: Major | null;
   sex: Sex;
 }
 
@@ -25,19 +25,8 @@ export interface ApiResponse<T> {
   data: T;
 }
 
-export interface PageInfo {
-  page: number;
-  size: number;
-  totalElements: number;
-  totalPages: number;
-}
-
+/** 목록 조회 API 공통 페이지 파라미터 (page는 0부터 시작) */
 export interface PageRequest {
   page?: number;
   size?: number;
-}
-
-export interface PagedResponse<T> {
-  content: T[];
-  pageInfo: PageInfo;
 }
