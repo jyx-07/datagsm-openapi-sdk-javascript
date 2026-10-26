@@ -29,6 +29,16 @@ export interface RequestOptions {
   headers?: Record<string, string>;
 }
 
+type StatusErrorConstructor = new (message: string, response?: unknown) => DataGsmError;
+
+const ERROR_BY_STATUS: Record<number, StatusErrorConstructor> = {
+  400: BadRequestError,
+  401: UnauthorizedError,
+  403: ForbiddenError,
+  404: NotFoundError,
+  409: ConflictError,
+};
+
 export class HttpClient {
   private readonly config: HttpClientConfig;
 
@@ -147,28 +157,27 @@ export class HttpClient {
 
     const errorMessage = this.extractErrorMessage(responseData) || response.statusText;
 
-    switch (response.status) {
-      case 400:
-        throw new BadRequestError(errorMessage, responseData);
-      case 401:
-        throw new UnauthorizedError(errorMessage, responseData);
-      case 403:
-        throw new ForbiddenError(errorMessage, responseData);
-      case 404:
-        throw new NotFoundError(errorMessage, responseData);
-      case 409:
-        throw new ConflictError(errorMessage, responseData);
-      case 429: {
-        const retryAfter = response.headers.get('Retry-After');
-        const retryAfterSeconds = retryAfter ? parseInt(retryAfter, 10) : undefined;
-        throw new RateLimitError(errorMessage, retryAfterSeconds, responseData);
-      }
-      default:
-        if (response.status >= 500) {
-          throw new ServerError(errorMessage, response.status, responseData);
-        }
-        throw new DataGsmError(errorMessage, response.status, responseData);
+    throw this.createError(response, errorMessage, responseData);
+  }
+
+  private createError(response: Response, message: string, data: unknown): DataGsmError {
+    const { status } = response;
+
+    if (status === 429) {
+      const retryAfter = response.headers.get('Retry-After');
+      const retryAfterSeconds = retryAfter ? parseInt(retryAfter, 10) : undefined;
+      return new RateLimitError(message, retryAfterSeconds, data);
     }
+
+    const ErrorClass = ERROR_BY_STATUS[status];
+    if (ErrorClass) {
+      return new ErrorClass(message, data);
+    }
+
+    if (status >= 500) {
+      return new ServerError(message, status, data);
+    }
+    return new DataGsmError(message, status, data);
   }
 
   private extractErrorMessage(data: unknown): string | undefined {
